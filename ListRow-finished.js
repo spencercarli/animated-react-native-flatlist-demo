@@ -9,7 +9,6 @@ class ListRow extends Component {
     super(props);
 
     this._animated = new Animated.Value(0);
-    this._animatedHeight = new Animated.Value(ROW_HEIGHT);
   }
 
   componentDidMount() {
@@ -22,16 +21,10 @@ class ListRow extends Component {
   onRemove = () => {
     const { onRemove } = this.props;
     if (onRemove) {
-      Animated.parallel([
-        Animated.timing(this._animated, {
-          toValue: 0,
-          duration: ANIMATION_DURATION,
-        }),
-        Animated.timing(this._animatedHeight, {
-          toValue: 0,
-          duration: ANIMATION_DURATION,
-        }),
-      ]).start(() => onRemove());
+      Animated.timing(this._animated, {
+        toValue: 0,
+        duration: ANIMATION_DURATION,
+      }).start(() => onRemove());
     }
   };
 
@@ -40,13 +33,19 @@ class ListRow extends Component {
 
     const rowStyles = [
       styles.row,
-      { height: this._animatedHeight },
+      {
+        height: this._animated.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, ROW_HEIGHT],
+          extrapolate: 'clamp',
+        }),
+      },
       { opacity: this._animated },
       {
         transform: [
           { scale: this._animated },
           {
-            rotateZ: this._animated.interpolate({
+            rotate: this._animated.interpolate({
               inputRange: [0, 1],
               outputRange: ['35deg', '0deg'],
               extrapolate: 'clamp',
@@ -78,6 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 15,
     alignItems: 'center',
+    height: ROW_HEIGHT,
   },
   image: {
     width: 50,
